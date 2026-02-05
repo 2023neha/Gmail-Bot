@@ -6,6 +6,10 @@
             "destination": "/backend/api/index.py"
         },
         {
+            "source": "/auth/(.*)",
+            "destination": "/backend/api/index.py"
+        },
+        {
             "source": "/(.*)",
             "destination": "/frontend/$1"
         }
