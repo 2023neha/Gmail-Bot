@@ -4,6 +4,10 @@
         {
             "source": "/api/(.*)",
             "destination": "/backend/api/index.py"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/frontend/$1"
         }
     ],
     "builds": [
