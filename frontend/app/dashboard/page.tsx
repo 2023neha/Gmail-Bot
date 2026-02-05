@@ -10,7 +10,10 @@ export default function Dashboard() {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    const backendUrl = "http://localhost:8001";
+    // In production (Vercel), we use /api rewrite. In local dev, we might need the full URL.
+    const backendUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? "http://localhost:8001"
+        : "/api";
 
     useEffect(() => {
         // Check for token in URL or localStorage

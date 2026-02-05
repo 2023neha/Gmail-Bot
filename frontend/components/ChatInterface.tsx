@@ -11,6 +11,10 @@ interface Message {
 }
 
 export default function ChatInterface({ token }: { token: string }) {
+    const apiBase = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? "http://localhost:8001"
+        : "/api";
+
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Hello! I can check your emails, summarize them, or help you write replies. What would you like to do?", type: "text" }
     ]);
@@ -57,7 +61,7 @@ export default function ChatInterface({ token }: { token: string }) {
     const fetchEmails = async () => {
         setMessages(prev => [...prev, { role: "assistant", content: "Fetching your recent emails...", type: "status" }]);
         try {
-            const res = await axios.get("http://localhost:8001/api/recent", {
+            const res = await axios.get(`${apiBase}/api/recent`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -76,7 +80,7 @@ export default function ChatInterface({ token }: { token: string }) {
     const handleGenerateReply = async (email: any) => {
         setMessages(prev => [...prev, { role: "assistant", content: `Drafting a reply to "${email.subject}"...`, type: "status" }]);
         try {
-            const res = await axios.post("http://localhost:8001/api/generate-reply", {
+            const res = await axios.post(`${apiBase}/api/generate-reply`, {
                 email_id: email.id,
                 original_content: email.snippet + "\n" + (email.summary || ""),
                 instructions: "positive professional"
@@ -110,7 +114,7 @@ export default function ChatInterface({ token }: { token: string }) {
     const handleSendReply = async (draftData: any) => {
         setMessages(prev => [...prev, { role: "assistant", content: "Sending email...", type: "status" }]);
         try {
-            await axios.post("http://localhost:8001/api/send", {
+            await axios.post(`${apiBase}/api/send`, {
                 to: draftData.to,
                 subject: draftData.subject,
                 body: draftData.reply,
@@ -136,7 +140,7 @@ export default function ChatInterface({ token }: { token: string }) {
 
         setMessages(prev => [...prev, { role: "assistant", content: "Deleting email...", type: "status" }]);
         try {
-            await axios.delete(`http://localhost:8001/api/${emailId}`, {
+            await axios.delete(`${apiBase}/api/${emailId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMessages(prev => [

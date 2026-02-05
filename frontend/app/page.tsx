@@ -3,7 +3,9 @@
 import Link from "next/link";
 
 export default function Home() {
-    const backendUrl = "http://localhost:8001";
+    const backendUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? "http://localhost:8001"
+        : ""; // Use relative path in production
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center bg-gray-900 text-white p-24">
