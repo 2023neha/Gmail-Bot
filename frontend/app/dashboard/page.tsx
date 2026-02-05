@@ -1,27 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ChatInterface from "@/components/ChatInterface";
 
-export default function Dashboard() {
+function DashboardContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
-    // In production (Vercel), we use /api rewrite. In local dev, we might need the full URL.
     const backendUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
         ? "http://localhost:8001"
         : "/api";
 
     useEffect(() => {
-        // Check for token in URL or localStorage
         const urlToken = searchParams.get("token");
         let token = urlToken || localStorage.getItem("token");
 
         if (urlToken) {
-            // Clear token from URL
             localStorage.setItem("token", urlToken);
             window.history.replaceState({}, document.title, "/dashboard");
         }
@@ -31,7 +28,6 @@ export default function Dashboard() {
             return;
         }
 
-        // Verify token and get user info
         fetch(`${backendUrl}/auth/me`, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -49,7 +45,7 @@ export default function Dashboard() {
                 localStorage.removeItem("token");
                 router.push("/");
             });
-    }, [router, searchParams]);
+    }, [router, searchParams, backendUrl]);
 
     if (loading) {
         return (
@@ -89,16 +85,25 @@ export default function Dashboard() {
                     <h2 className="text-2xl font-bold mb-4">Welcome, {user.name}!</h2>
                     <p className="text-gray-400 mb-6">
                         I am your AI assistant. I can help you read, summarize, and reply to your emails.
-                        <br />
-                        Simply ask me to <b>"Check my latest emails"</b> or <b>"Write a reply"</b>.
                     </p>
 
-                    {/* Chat Interface */}
                     <div className="mt-8 border-t border-gray-700 pt-8 w-full h-[600px]">
                         <ChatInterface token={localStorage.getItem("token") || ""} />
                     </div>
                 </div>
             </section>
         </main>
+    );
+}
+
+export default function Dashboard() {
+    return (
+        <Suspense fallback={
+            <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
+                <p>Loading...</p>
+            </div>
+        }>
+            <DashboardContent />
+        </Suspense>
     );
 }
